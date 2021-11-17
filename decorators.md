@@ -229,3 +229,37 @@ Note that the parameter `request` does not appear in your OAS file.
 Likewise you can use the decorator `@Inject` to mark a parameter as being injected manually and should be omitted in Spec generation.
 In this case you should write your own custom template where you inject the needed objects/values in the method-call.
 :::
+
+## Produces
+
+To define custom media type of responses (don't overwrite content-type response) for controller methods use the `@Produces` decorator.
+You can also specify custom media type per method. 
+
+```typescript
+@Route('MediaTypeTest')
+@Produces('application/vnd.mycompany.myapp+json')
+export class MediaTypeTestController extends Controller {
+  @Get('Default/{userId}')
+  public async getDefaultProduces(@Path() userId: number): Promise<UserResponseModel> {
+    this.setHeader('Content-Type', 'application/vnd.mycompany.myapp+json');
+    return Promise.resolve({
+      id: userId,
+      name: 'foo',
+    });
+  }
+
+  @Get('Custom/security.txt')
+  @Produces('text/plain')
+  public async getCustomProduces(): Promise<string> {
+    const securityTxt = 'Contact: mailto: security@example.com\nExpires: 2012-12-12T12:37:00.000Z';
+    this.setHeader('Content-Type', 'text/plain');
+    return securityTxt;
+  }
+}
+```
+
+
+::: danger
+Using `@Produces` decorator will only affect generated OpenAPI Specification.You have to always make sure to send 
+correct header using `this.setHeader('Content-Type', 'MEDIA_TYPE')`.
+:::
